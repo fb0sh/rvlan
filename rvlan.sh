@@ -5,7 +5,7 @@ set -e
 # 基础配置
 ########################
 # docker.1ms.run/kylemanna/openvpn:latest
-OVPN_IMAGE="docker.1ms.run/kylemanna/openvpn:latest"
+OVPN_IMAGE="kylemanna/openvpn:latest"
 OVPN_DATA="$PWD/ovpn-data"
 
 OVPN_IP="0.0.0.0"
@@ -26,13 +26,23 @@ check_container() {
   docker ps -a --format '{{.Names}}' | grep -q openvpn
 }
 
+check_image() {
+    if docker images -q "$OVPN_IMAGE" > /dev/null 2>&1; then
+        log "Found local image: $OVPN_IMAGE"
+    else
+        log "Error: Image $OVPN_IMAGE not found!"
+	docker pull "$OVPVN_IMAGE"
+        exit 1
+    fi
+}
+
 ########################
 # INIT
 ########################
 init_vpn() {
   log "Init OpenVPN (split tunnel ONLY)..."
 
-  docker pull "$OVPN_IMAGE"
+  check_image
 
   rm -rf "$OVPN_DATA"
   mkdir -p "$OVPN_DATA"
